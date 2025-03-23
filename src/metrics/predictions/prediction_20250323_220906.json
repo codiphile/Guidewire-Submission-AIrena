@@ -1,0 +1,62 @@
+{
+    "timestamp": "2025-03-23 22:09:06",
+    "input_metrics": {
+        "cpu_pct": 92.5,
+        "memory_pct": 95.1,
+        "network_latency_ms": 42.3,
+        "disk_io_mbps": 83.7,
+        "error_rate": 0.62,
+        "avg_response_time_ms": 48.9,
+        "pod_restarts": 5,
+        "cpu_throttling": 68.2
+    },
+    "prediction": {
+        "probability": 0.9999999961050239,
+        "prediction": true,
+        "prediction_label": "LIKELY TO FAIL",
+        "timestamp": "2025-03-23 22:09:06"
+    },
+    "model_metrics": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "confusion_matrix": [
+            [
+                3679,
+                0
+            ],
+            [
+                0,
+                321
+            ]
+        ],
+        "classification_report": {
+            "0": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 3679.0
+            },
+            "1": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 321.0
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 4000.0
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 4000.0
+            }
+        }
+    }
+}

@@ -1,0 +1,70 @@
+# Virtual Environment
+k8s_venv/
+venv/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+*.pem
+.pem
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Large model files and data (uncomment if you don't want to include these in version control)
+# *.csv
+# *.h5
+# *.model
+
+# Generated files
+#bayesian_network.png
+#confusion_matrix.png
+
+# Logs
+logs/
+*.log
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.spyderproject
+.spyproject
+.ropeproject
+.project
+.pydevproject
+.settings/
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+src/data/augmented_kubernetes_metrics.csv
+src/data/kubernetes_node_metrics.csv
+src/data/kubernetes_node_metrics.csv.bak

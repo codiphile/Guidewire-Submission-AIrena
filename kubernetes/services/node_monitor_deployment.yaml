@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: node-monitor-sa
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-monitor-role
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes", "pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: node-monitor-binding
+subjects:
+  - kind: ServiceAccount
+    name: node-monitor-sa
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: node-monitor-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-monitor
+  labels:
+    app: node-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-monitor
+  template:
+    metadata:
+      labels:
+        app: node-monitor
+    spec:
+      serviceAccountName: node-monitor-sa
+      containers:
+        - name: node-monitor
+          image: k8s-failure-prediction:latest
+          imagePullPolicy: IfNotPresent
+          command: ["python", "kubernetes/services/node_monitor.py"]
+          env:
+            - name: PREDICTION_API_URL
+              value: "http://node-failure-prediction-svc/predict"
+            - name: MONITORING_INTERVAL
+              value: "60"
+            - name: ALERT_THRESHOLD
+              value: "0.7"
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+          volumeMounts:
+            - name: monitoring-config
+              mountPath: /app/kubernetes/config
+      volumes:
+        - name: monitoring-config
+          configMap:
+            name: node-monitor-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: node-monitor-config
+  namespace: default
+data:
+  config.json: |
+    {
+      "thresholds": {
+        "cpu_percent": 80,
+        "memory_percent": 85,
+        "network_latency_ms": 40,
+        "disk_io_mbps": 75,
+        "error_rate": 0.3,
+        "response_time_ms": 100,
+        "pod_restarts": 3,
+        "cpu_throttling": 60
+      },
+      "model_performance": {
+        "precision": 0.89,
+        "recall": 0.88,
+        "f1_score": 0.89,
+        "accuracy": 0.96
+      },
+      "alert": {
+        "failure_probability_threshold": 0.65,
+        "medium_risk_threshold": 0.30,
+        "channels": {
+          "slack": {
+            "webhook_url": "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK",
+            "channel": "#k8s-alerts",
+            "username": "K8s Node Monitor"
+          }
+        }
+      },
+      "monitoring": {
+        "check_interval_seconds": 300,
+        "collect_metrics_batch_size": 10,
+        "prediction_timeout_seconds": 10,
+        "history_retention_days": 30
+      }
+    }

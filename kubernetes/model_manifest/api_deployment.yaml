@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-failure-prediction-svc
+  labels:
+    app: node-failure-prediction
+spec:
+  selector:
+    app: node-failure-prediction
+  ports:
+    - port: 80
+      targetPort: 5000
+      name: http
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-failure-prediction
+  namespace: default
+  labels:
+    app: node-failure-prediction
+  annotations:
+    model.metrics/precision: "0.8948"
+    model.metrics/recall: "0.8859"
+    model.metrics/f1-score: "0.8903"
+    model.metrics/accuracy: "0.9643"
+    model.metrics/threshold: "0.26"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: node-failure-prediction
+  template:
+    metadata:
+      labels:
+        app: node-failure-prediction
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "5000"
+    spec:
+      containers:
+        - name: prediction-api
+          image: k8s-failure-prediction:latest
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: "1"
+              memory: "2Gi"
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+          ports:
+            - containerPort: 5000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: model-storage
+              mountPath: /app/src/models/saved
+            - name: prediction-history
+              mountPath: /app/src/data
+      volumes:
+        - name: model-storage
+          persistentVolumeClaim:
+            claimName: model-storage-pvc
+        - name: prediction-history
+          persistentVolumeClaim:
+            claimName: prediction-history-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-storage-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prediction-history-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: node-failure-prediction-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/prediction
+            pathType: Prefix
+            backend:
+              service:
+                name: node-failure-prediction-svc
+                port:
+                  number: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-metrics-config
+  namespace: default
+data:
+  model_metrics.json: |
+    {
+      "model_type": "SVM",
+      "updated_at": "2025-03-23",
+      "metrics": {
+        "precision": 0.8948,
+        "recall": 0.8859,
+        "f1_score": 0.8903,
+        "accuracy": 0.9643,
+        "threshold": 0.26,
+        "roc_auc": 0.8512
+      },
+      "description": "Support Vector Machine for Kubernetes node failure prediction with realistic performance metrics",
+      "training_data": {
+        "records": 5000,
+        "failure_rate": 0.0706,
+        "features": 8
+      }
+    }

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-k8s-failure-prediction
+  labels:
+    app: test-k8s-failure-prediction
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-k8s-failure-prediction
+  template:
+    metadata:
+      labels:
+        app: test-k8s-failure-prediction
+    spec:
+      containers:
+        - name: predictor
+          image: arpankumar1119/test-k8s-failure-prediction:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          resources:
+            limits:
+              cpu: "4"
+              memory: "8Gi"
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+          volumeMounts:
+            - name: model-volume
+              mountPath: /app/src/models/other  # Mount to a different directory
+      volumes:
+        - name: model-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-k8s-failure-prediction-service
+spec:
+  selector:
+    app: test-k8s-failure-prediction
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: ClusterIP

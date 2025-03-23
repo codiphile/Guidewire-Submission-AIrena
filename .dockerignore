@@ -1,0 +1,86 @@
+# .dockerignore
+
+# Python-specific ignores
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Development & IDE
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# Version control
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Build and dependency files
+Dockerfile
+docker-compose*
+.dockerignore
+node_modules/
+bower_components/
+
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Local development artifacts
+.directory
+.cache
+coverage/
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Documentation
+docs/_build/
+site/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test files
+tests/
+test/
+examples/
+sample-data/
+
+# Archives and binaries
+*.zip
+*.tar.gz
+*.7z
+*.dmg
+*.exe
+
+# Custom files (add your project-specific ignores below)
+*.pem
+*.key
+credentials.json
+secrets/
+
+src/data/
+vm-Azure-files/
